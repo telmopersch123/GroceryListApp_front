@@ -1,35 +1,43 @@
 import { globalStyles } from "@/constants/globalStyles";
-import { useRouter } from "expo-router";
-import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react-native";
-import { useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { ArrowLeft, FileEdit, Plus, Trash2 } from "lucide-react-native";
+import { useEffect, useState } from "react";
 import {
   Keyboard,
   LayoutAnimation,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  UIManager,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { TypeItens } from "../types/typesGlobal";
+export default function EditarLista() {
+  const router = useRouter();
+  const params = useLocalSearchParams();
 
-export default function CriarLista() {
-  const [nomeLista, setNomeLista] = useState("");
-  const [item, setItem] = useState("");
   const [erroNome, setErroNome] = useState("");
   const [erroItem, setErroItem] = useState("");
+  const [nomeLista, setNomeLista] = useState("");
+  const [itemInput, setItemInput] = useState("");
+
   const [ItensList, setItensList] = useState<{ id: string; name: string }[]>(
     []
   );
-  const router = useRouter();
-  if (Platform.OS === "android") {
-    if (UIManager.setLayoutAnimationEnabledExperimental) {
-      UIManager.setLayoutAnimationEnabledExperimental(true);
+  useEffect(() => {
+    if (params.lista) {
+      const lista = JSON.parse(params.lista as string);
+      const itensFormatados = lista.itens.map((item: TypeItens) => ({
+        ...item,
+        checked: false,
+      }));
+      setItensList(itensFormatados);
+      setNomeLista(lista.name);
     }
-  }
+  }, [params.lista]);
+
   function handleSalvar() {
     let temErro = false;
     if (!nomeLista.trim()) {
@@ -39,26 +47,23 @@ export default function CriarLista() {
       setErroNome("");
     }
 
-    if (!item.trim() && ItensList.length === 0) {
+    if (!itemInput.trim() && ItensList.length === 0) {
       setErroItem("Adicione pelo menos um item");
       temErro = true;
     } else {
       setErroItem("");
     }
-    if (ItensList.length === 0) {
-      setErroItem("Adicione pelo menos um item");
-      temErro = true;
-    }
     if (temErro) return;
+
     const novaLista = {
       id: Date.now().toString(),
       name: nomeLista,
       itens: ItensList,
     };
     router.push({
-      pathname: "/",
+      pathname: "/components/lista-aberta",
       params: {
-        novaLista: JSON.stringify(novaLista),
+        lista: JSON.stringify(novaLista),
       },
     });
   }
@@ -69,19 +74,18 @@ export default function CriarLista() {
   }
 
   return (
-    <SafeAreaView style={globalStyles.safe} onTouchStart={Keyboard.dismiss}>
-      <View style={globalStyles.containerRow}>
+    <SafeAreaView style={styles.container} onTouchStart={Keyboard.dismiss}>
+      <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
           <ArrowLeft size={24} color="#212121" />
         </Pressable>
-        <Text style={globalStyles.titleSecondary}>Nova Lista</Text>
+        <Text style={styles.title}>Editar Lista</Text>
       </View>
-      <View style={styles.container}>
-        <View style={{ marginBottom: 5 }}>
+      <View style={{ marginBottom: 20, marginTop: 20 }}>
+        <View>
           <Text style={globalStyles.label}>Nome da lista</Text>
           <TextInput
             placeholder="Ex: Compras do mês de Janeiro"
-            placeholderTextColor="#9E9E9E"
             value={nomeLista}
             maxLength={35}
             onChangeText={(text) => {
@@ -90,17 +94,17 @@ export default function CriarLista() {
             }}
             style={[globalStyles.input, erroNome && globalStyles.inputError]}
           />
-          <Text style={globalStyles.error}>{erroNome || " "}</Text>
+          <Text style={globalStyles.error}>{erroNome || ""}</Text>
         </View>
         <Text style={globalStyles.label}>Itens da sua lista</Text>
         <View style={globalStyles.row}>
           <TextInput
             placeholder="Adicionar item..."
             placeholderTextColor="#9E9E9E"
-            value={item}
+            value={itemInput}
             maxLength={35}
             onChangeText={(text) => {
-              setItem(text);
+              setItemInput(text);
               if (text.length >= 35)
                 return setErroItem("Limite de 35 caracteres");
               if (text.trim()) setErroItem("");
@@ -114,34 +118,33 @@ export default function CriarLista() {
 
           <Pressable
             onPress={() => {
-              if (!item.trim()) return;
+              if (!itemInput.trim()) return;
               LayoutAnimation.configureNext(
                 LayoutAnimation.Presets.easeInEaseOut
               );
               const novoItem = {
                 id: Date.now().toString(),
-                name: item,
+                name: itemInput,
               };
               setItensList((prev) => [...prev, novoItem]);
               setErroItem("");
 
-              setItem("");
+              setItemInput("");
             }}
             style={globalStyles.addButton}
           >
             <Plus size={20} color="#fff" />
           </Pressable>
         </View>
-        <Text style={globalStyles.error}>{erroItem || " "}</Text>
+        <Text style={globalStyles.error}>{erroItem || ""}</Text>
       </View>
-
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
-        <View style={globalStyles.listContainer}>
-          {ItensList.map((item, _) => (
+        <View>
+          {ItensList.map((item) => (
             <View key={item.id} style={globalStyles.itemCard}>
               <Text style={globalStyles.itemText}>{item.name}</Text>
               <Pressable
@@ -161,36 +164,70 @@ export default function CriarLista() {
       </ScrollView>
       <View style={globalStyles.buttonContainer}>
         <Pressable style={globalStyles.saveButton} onPress={handleSalvar}>
-          <Save size={18} color="#fff" />
-          <Text style={globalStyles.saveText}>Criar</Text>
+          <FileEdit size={18} color="#fff" />
+          <Text style={globalStyles.saveText}>Confirmar alterações</Text>
         </Pressable>
       </View>
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+
   header: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 20,
     gap: 10,
+    marginBottom: 15,
   },
-  backButton: {
-    padding: 5,
-  },
+
   title: {
     fontSize: 20,
     fontWeight: "bold",
-  },
-
-  container: {
-    padding: 20,
-  },
-
-  listTitle: {
-    fontSize: 16,
-    fontWeight: "600",
     color: "#212121",
+  },
+
+  itemCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
+    padding: 14,
+    borderRadius: 10,
     marginBottom: 10,
+    gap: 10,
+  },
+
+  circle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#BDBDBD",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  circleChecked: {
+    backgroundColor: "#337539",
+    borderColor: "#337539",
+  },
+
+  itemChecked: {
+    opacity: 0.6,
+  },
+
+  itemText: {
+    fontSize: 16,
+    color: "#212121",
+  },
+
+  itemTextChecked: {
+    textDecorationLine: "line-through",
+    color: "#757575",
   },
 });

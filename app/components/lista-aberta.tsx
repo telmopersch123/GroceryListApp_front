@@ -1,12 +1,6 @@
 import { globalStyles } from "@/constants/globalStyles";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import {
-  ArrowLeft,
-  Check,
-  Heart,
-  Pencil,
-  RotateCcw,
-} from "lucide-react-native";
+import { ArrowLeft, Check, Heart, Pencil } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -39,6 +33,7 @@ export default function ListaAberta() {
     }).start();
   }, [porcentagem]);
   useEffect(() => {
+    console.log(params);
     if (params.lista) {
       const lista = JSON.parse(params.lista as string);
       const itensFormatados = lista.itens.map((item: TypeItens) => ({
@@ -87,6 +82,14 @@ export default function ListaAberta() {
             globalStyles.actionButton,
             pressed && globalStyles.actionButtonPressed,
           ]}
+          onPress={() =>
+            router.push({
+              pathname: "/components/editar-lista",
+              params: {
+                lista: JSON.stringify(lista),
+              },
+            })
+          }
         >
           <>
             <Pencil size={16} color="#212121" />
@@ -103,18 +106,6 @@ export default function ListaAberta() {
           <>
             <Heart size={16} color="#212121" />
             <Text style={styles.actionText}>Favoritar</Text>
-          </>
-        </Pressable>
-
-        <Pressable
-          style={({ pressed }) => [
-            globalStyles.actionButton,
-            pressed && globalStyles.actionButtonPressed,
-          ]}
-        >
-          <>
-            <RotateCcw size={16} color="#212121" />
-            <Text style={styles.actionText}>Reutilizar</Text>
           </>
         </Pressable>
       </View>
