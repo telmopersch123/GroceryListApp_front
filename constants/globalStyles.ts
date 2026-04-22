@@ -230,4 +230,8 @@ export const globalStyles = StyleSheet.create({
   floatingButtonPressed: {
     opacity: 0.7,
   },
+  inputContainer: {
+    marginBottom: 15,
+    marginTop: 10,
+  },
 });
