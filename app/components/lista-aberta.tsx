@@ -1,29 +1,7 @@
+import { ICONES } from "@/components/categorias/categoriaAccordion";
 import { globalStyles } from "@/constants/globalStyles";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import {
-  Apple,
-  ArrowLeft,
-  Beef,
-  Bike,
-  Bone,
-  Check,
-  Cookie,
-  Flame,
-  Gift,
-  Heart,
-  Home,
-  Leaf,
-  Milk,
-  Pencil,
-  Shirt,
-  ShoppingCart,
-  Smile,
-  Snowflake,
-  Sparkles,
-  Tag,
-  Wine,
-  X,
-} from "lucide-react-native";
+import { ArrowLeft, Check, Heart, Pencil, Tag, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -36,6 +14,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TypeItens, TypeListRenderHome } from "../types/typesGlobal";
+
+//DADOS MOCADOS
 const CATEGORIAS_MOCK = [
   { id: "1", nome: "Limpeza", iconeIndex: 0 },
   { id: "2", nome: "Frutas", iconeIndex: 1 },
@@ -53,26 +33,7 @@ const CATEGORIAS_MOCK = [
   { id: "14", nome: "Hortifruti", iconeIndex: 14 },
   { id: "15", nome: "Presentes", iconeIndex: 17 },
 ];
-const ICONES = [
-  ShoppingCart,
-  Apple,
-  Beef,
-  Cookie,
-  Milk,
-  Wine,
-  Sparkles,
-  Heart,
-  Smile,
-  Bone,
-  Pencil,
-  Bike,
-  Shirt,
-  Home,
-  Leaf,
-  Flame,
-  Snowflake,
-  Gift,
-];
+/////////////////////////////////////////////
 export default function ListaAberta() {
   const router = useRouter();
   const params = useLocalSearchParams();

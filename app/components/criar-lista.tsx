@@ -15,6 +15,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { showToast } from "../hooks/useToast";
 
 export default function CriarLista() {
   const [nomeLista, setNomeLista] = useState("");
@@ -60,6 +61,11 @@ export default function CriarLista() {
       params: {
         novaLista: JSON.stringify(novaLista),
       },
+    });
+    showToast({
+      type: "success",
+      text1: "Pronto",
+      text2: "A sua lista foi criada com sucesso!",
     });
   }
 

@@ -10,3 +10,9 @@ export type TypeItens = {
   name: string;
   checked: boolean;
 };
+
+export interface Categoria {
+  id: string;
+  nome: string;
+  iconeIndex: number;
+}

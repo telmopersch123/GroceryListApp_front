@@ -1,6 +1,11 @@
+import { Toast } from "@/components/ui/Toast";
+
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useToast } from "./hooks/useToast";
+
 export default function RootLayout() {
+  const { toast, hide } = useToast();
   return (
     <>
       <StatusBar style="dark" />
@@ -15,6 +20,7 @@ export default function RootLayout() {
           }}
         />
       </Stack>
+      <Toast {...toast} onHide={hide} />
     </>
   );
 }

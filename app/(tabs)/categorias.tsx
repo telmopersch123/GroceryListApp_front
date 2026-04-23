@@ -1,31 +1,12 @@
+import {
+  CategoriaAccordion,
+  ICONES,
+} from "@/components/categorias/categoriaAccordion";
+import { IconeButton } from "@/components/categorias/iconeButton";
 import { globalStyles } from "@/constants/globalStyles";
+import { LayoutGrid, Plus, X } from "lucide-react-native";
+import React, { useRef, useState } from "react";
 import {
-  Apple,
-  Beef,
-  Bike,
-  Bone,
-  ChevronRight,
-  Cookie,
-  Flame,
-  Gift,
-  Heart,
-  Home,
-  LayoutGrid,
-  Leaf,
-  Milk,
-  Pencil,
-  Plus,
-  Shirt,
-  ShoppingCart,
-  Smile,
-  Snowflake,
-  Sparkles,
-  Wine,
-  X,
-} from "lucide-react-native";
-import React, { useEffect, useRef, useState } from "react";
-import {
-  Animated,
   Keyboard,
   Modal,
   Pressable,
@@ -36,127 +17,47 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const ICONES = [
-  ShoppingCart,
-  Apple,
-  Beef,
-  Cookie,
-  Milk,
-  Wine,
-  Sparkles,
-  Heart,
-  Smile,
-  Bone,
-  Pencil,
-  Bike,
-  Shirt,
-  Home,
-  Leaf,
-  Flame,
-  Snowflake,
-  Gift,
-];
-
-interface Categoria {
-  id: string;
-  nome: string;
-  iconeIndex: number;
-}
-
-interface IconeButtonProps {
-  Icone: any;
-  index: number;
-  selecionado: boolean;
-  onPress: (index: number) => void;
-}
-
-function IconeButton({ Icone, index, selecionado, onPress }: IconeButtonProps) {
-  const anim = useRef(new Animated.Value(selecionado ? 1 : 0)).current;
-
-  useEffect(() => {
-    Animated.timing(anim, {
-      toValue: selecionado ? 1 : 0,
-      duration: 250,
-      useNativeDriver: false,
-    }).start();
-  }, [selecionado]);
-
-  const bg = anim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["#F5F5F5", "#337539"],
-  });
-
-  return (
-    <Pressable onPress={() => onPress(index)}>
-      <Animated.View style={[styles.iconButton, { backgroundColor: bg }]}>
-        <Icone size={22} color={selecionado ? "#fff" : "#424242"} />
-      </Animated.View>
-    </Pressable>
-  );
-}
-
-function CategoriaAccordion({ categoria }: { categoria: Categoria }) {
-  const expandedRef = useRef(false);
-  const animRotate = useRef(new Animated.Value(0)).current;
-  const animHeight = useRef(new Animated.Value(0)).current;
-
-  function toggle() {
-    const abrindo = !expandedRef.current;
-    expandedRef.current = abrindo;
-    Animated.parallel([
-      Animated.timing(animRotate, {
-        toValue: abrindo ? 1 : 0,
-        duration: 250,
-        useNativeDriver: false,
-      }),
-      Animated.timing(animHeight, {
-        toValue: abrindo ? 50 : 0,
-        duration: 250,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  }
-
-  const rotate = animRotate.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "90deg"],
-  });
-
-  const Icone = ICONES[categoria.iconeIndex];
-
-  return (
-    <View style={styles.categoriaCard}>
-      <Pressable style={styles.categoriaRow} onPress={toggle}>
-        <View style={styles.categoriaLeft}>
-          <View style={styles.categoriaIcone}>
-            <Icone size={22} color="#337539" />
-          </View>
-          <Text style={styles.categoriaText}>{categoria.nome}</Text>
-        </View>
-        <View style={styles.categoriaRight}>
-          <Text style={styles.categoriaListas}>0 listas</Text>
-          <Animated.View style={{ transform: [{ rotate }] }}>
-            <ChevronRight size={18} color="#9E9E9E" />
-          </Animated.View>
-        </View>
-      </Pressable>
-
-      <Animated.View style={{ height: animHeight, overflow: "hidden" }}>
-        <View style={styles.accordionContent}>
-          <Text style={styles.emptyListas}>Nenhuma lista nesta categoria.</Text>
-        </View>
-      </Animated.View>
-    </View>
-  );
-}
+import { showToast } from "../hooks/useToast";
+import { Categoria, TypeListRenderHome } from "../types/typesGlobal";
+import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
 
 export default function Categorias() {
+  const openSwipeRef = useRef<SwipeableRef | null>(null);
   const [modalVisivel, setModalVisivel] = useState(false);
   const [nomeCategoria, setNomeCategoria] = useState("");
   const [iconeSelecionado, setIconeSelecionado] = useState(0);
   const [error, setError] = useState("");
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [listas, setListas] = useState<TypeListRenderHome[]>([
+    {
+      id: "1",
+      name: "Compras do mês",
+      favorited: true,
+      itens: [
+        { id: "1", name: "Arroz", checked: false },
+        { id: "2", name: "Feijão", checked: false },
+      ],
+    },
+    {
+      id: "2",
+      name: "Mercado semana",
+      favorited: false,
+      itens: [
+        { id: "1", name: "Leite", checked: false },
+        { id: "2", name: "Ovos", checked: false },
+        { id: "3", name: "Pão", checked: false },
+      ],
+    },
+    {
+      id: "3",
+      name: "Churrasco fim de semana",
+      favorited: false,
+      itens: [
+        { id: "1", name: "Carne", checked: false },
+        { id: "2", name: "Carvão", checked: false },
+      ],
+    },
+  ]);
 
   const handleCreateCategory = () => {
     if (!nomeCategoria.trim()) {
@@ -170,6 +71,11 @@ export default function Categorias() {
     };
     setCategorias((prev) => [...prev, novaCategoria]);
     ExitModal();
+    showToast({
+      type: "success",
+      text1: "Pronto",
+      text2: "Categoria criada com sucesso!",
+    });
   };
 
   const ExitModal = () => {
@@ -181,7 +87,14 @@ export default function Categorias() {
   };
 
   return (
-    <SafeAreaView style={globalStyles.safe} onTouchStart={Keyboard.dismiss}>
+    <SafeAreaView
+      style={globalStyles.safe}
+      onStartShouldSetResponderCapture={() => {
+        closeAllSwipes(openSwipeRef);
+        Keyboard.dismiss();
+        return false;
+      }}
+    >
       <View style={globalStyles.container}>
         <View style={styles.header}>
           <View>
@@ -229,7 +142,13 @@ export default function Categorias() {
           >
             {categorias.map((categoria) => {
               return (
-                <CategoriaAccordion key={categoria.id} categoria={categoria} />
+                <CategoriaAccordion
+                  key={categoria.id}
+                  categoria={categoria}
+                  listas={listas}
+                  setListas={setListas}
+                  openSwipeRef={openSwipeRef}
+                />
               );
             })}
           </ScrollView>
@@ -257,9 +176,12 @@ export default function Categorias() {
                 placeholder="Ex: Limpeza"
                 placeholderTextColor="#9E9E9E"
                 value={nomeCategoria}
-                onChangeText={setNomeCategoria}
+                onChangeText={(text) => {
+                  setError("");
+                  setNomeCategoria(text);
+                }}
                 maxLength={30}
-                style={styles.input}
+                style={[styles.input, error && globalStyles.inputError]}
               />
               <Text style={globalStyles.error}>{error || " "}</Text>
             </View>
@@ -325,33 +247,7 @@ const styles = StyleSheet.create({
   categoriaCardPressed: {
     opacity: 0.7,
   },
-  categoriaLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  categoriaIcone: {
-    width: 42,
-    height: 42,
-    borderRadius: 10,
-    backgroundColor: "#F0F7F1",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  categoriaText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#212121",
-  },
-  categoriaRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  categoriaListas: {
-    fontSize: 13,
-    color: "#9E9E9E",
-  },
+
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -389,20 +285,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "transparent",
     fontSize: 15,
+    marginTop: 8,
   },
   iconGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
     marginTop: 4,
-  },
-  iconButton: {
-    width: 46,
-    height: 46,
-    borderRadius: 10,
-    backgroundColor: "#F5F5F5",
-    justifyContent: "center",
-    alignItems: "center",
   },
   modalFooter: {
     flexDirection: "row",
@@ -431,31 +320,5 @@ const styles = StyleSheet.create({
   saveText: {
     color: "#fff",
     fontWeight: "bold",
-  },
-
-  accordionContent: {
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#F0F0F0",
-    marginTop: 10,
-  },
-  emptyListas: {
-    fontSize: 13,
-    color: "#9E9E9E",
-    textAlign: "center",
-    paddingVertical: 8,
-  },
-  categoriaCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#F0F0F0",
-  },
-  categoriaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
   },
 });
