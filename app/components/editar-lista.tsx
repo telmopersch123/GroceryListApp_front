@@ -1,4 +1,4 @@
-import { globalStyles } from "@/constants/globalStyles";
+import { useGlobalStyles } from "@/constants/globalStyles";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, FileEdit, Plus, Trash2 } from "lucide-react-native";
 import { useEffect, useState } from "react";
@@ -15,6 +15,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TypeItens } from "../types/typesGlobal";
 export default function EditarLista() {
+  const globalStyles = useGlobalStyles();
   const router = useRouter();
   const params = useLocalSearchParams();
 

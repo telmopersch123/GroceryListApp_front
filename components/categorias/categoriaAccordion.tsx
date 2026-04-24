@@ -54,14 +54,18 @@ export function CategoriaAccordion({
   listas,
   setListas,
   openSwipeRef,
+
   // onRemover,
 }: {
   categoria: Categoria;
   listas: TypeListRenderHome[];
   setListas: React.Dispatch<React.SetStateAction<TypeListRenderHome[]>>;
   openSwipeRef: RefObject<SwipeableRef | null>;
+
   // onRemover: (id: string) => void;
 }) {
+  const [animationKey, setAnimationKey] = useState(0);
+
   const expandedRef = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isSwiping, setIsSwiping] = useState(false);
@@ -74,6 +78,9 @@ export function CategoriaAccordion({
     if (isSwiping) return;
     const abrindo = !expandedRef.current;
     expandedRef.current = abrindo;
+    if (abrindo) {
+      setAnimationKey((prev) => prev + 1);
+    }
     setIsOpen(abrindo);
     Animated.parallel([
       Animated.timing(animRotate, {
@@ -109,7 +116,9 @@ export function CategoriaAccordion({
 
         openSwipeRef.current = swipeableRef.current;
       }}
-      onSwipeableOpenStartDrag={() => setIsSwiping(true)}
+      onSwipeableOpenStartDrag={() => {
+        setIsSwiping(true);
+      }}
       onSwipeableClose={() => setIsSwiping(false)}
       onSwipeableWillClose={() => setIsSwiping(false)}
       renderRightActions={(
@@ -156,14 +165,18 @@ export function CategoriaAccordion({
               contentHeight.current = e.nativeEvent.layout.height;
             }}
           >
-            <View style={styles.accordionContent}>
+            <View
+              key={`accordion-key-${animationKey}`}
+              style={styles.accordionContent}
+            >
               {listas.length > 0 ? (
-                listas.map((lista) => (
+                listas.map((lista, index) => (
                   <CardList
                     key={lista.id}
                     lista={lista}
                     setListas={setListas}
                     openSwipeRef={openSwipeRef}
+                    index={index}
                   />
                 ))
               ) : (
@@ -185,6 +198,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#F0F0F0",
     marginTop: 10,
+    overflow: "hidden",
   },
   emptyListas: {
     fontSize: 13,

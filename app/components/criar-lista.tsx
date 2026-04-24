@@ -1,4 +1,4 @@
-import { globalStyles } from "@/constants/globalStyles";
+import { useGlobalStyles } from "@/constants/globalStyles";
 import { useRouter } from "expo-router";
 import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react-native";
 import { useState } from "react";
@@ -14,10 +14,16 @@ import {
   UIManager,
   View,
 } from "react-native";
+import Animated, {
+  FadeIn,
+  FadeOut,
+  LinearTransition,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { showToast } from "../hooks/useToast";
 
 export default function CriarLista() {
+  const globalStyles = useGlobalStyles();
   const [nomeLista, setNomeLista] = useState("");
   const [item, setItem] = useState("");
   const [erroNome, setErroNome] = useState("");
@@ -148,7 +154,13 @@ export default function CriarLista() {
       >
         <View style={globalStyles.listContainer}>
           {ItensList.map((item, _) => (
-            <View key={item.id} style={globalStyles.itemCard}>
+            <Animated.View
+              entering={FadeIn.duration(400)}
+              exiting={FadeOut.duration(300)}
+              layout={LinearTransition.springify().damping(15)}
+              key={item.id}
+              style={globalStyles.itemCard}
+            >
               <Text style={globalStyles.itemText}>{item.name}</Text>
               <Pressable
                 onPress={() => handleRemover(item.id)}
@@ -161,7 +173,7 @@ export default function CriarLista() {
                   <Trash2 size={20} color={pressed ? "#E53935" : "black"} />
                 )}
               </Pressable>
-            </View>
+            </Animated.View>
           ))}
         </View>
       </ScrollView>

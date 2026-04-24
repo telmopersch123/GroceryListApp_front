@@ -1,5 +1,7 @@
 import CardList from "@/components/ui/cardList";
-import { globalStyles } from "@/constants/globalStyles";
+
+import { useGlobalStyles } from "@/constants/globalStyles";
+import { useIsFocused } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Plus, ShoppingCart } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
@@ -9,6 +11,8 @@ import { TypeListRenderHome } from "../types/typesGlobal";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
 
 export default function Home() {
+  const globalStyles = useGlobalStyles();
+  const isFocused = useIsFocused();
   const router = useRouter();
   const [listas, setListas] = useState<TypeListRenderHome[]>([]);
   const params = useLocalSearchParams();
@@ -45,14 +49,18 @@ export default function Home() {
             </Text>
           </View>
         ) : (
-          <View style={{ marginTop: 20 }}>
+          <View
+            style={{ marginTop: 20, flex: 1, overflow: "hidden" }}
+            key={isFocused ? "focused" : "unfocused"}
+          >
             <ScrollView>
-              {listas.map((lista) => (
+              {listas.map((lista, index) => (
                 <CardList
                   key={lista.id}
                   lista={lista}
                   setListas={setListas}
                   openSwipeRef={openSwipeRef}
+                  index={index}
                 />
               ))}
             </ScrollView>

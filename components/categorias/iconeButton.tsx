@@ -1,3 +1,4 @@
+import { useSettings } from "@/app/context/SettingsContext";
 import { useEffect, useRef } from "react";
 import { Animated, Pressable, StyleSheet } from "react-native";
 interface IconeButtonProps {
@@ -13,7 +14,7 @@ export function IconeButton({
   onPress,
 }: IconeButtonProps) {
   const anim = useRef(new Animated.Value(selecionado ? 1 : 0)).current;
-
+  const { colors, isDark } = useSettings();
   useEffect(() => {
     Animated.timing(anim, {
       toValue: selecionado ? 1 : 0,
@@ -24,7 +25,7 @@ export function IconeButton({
 
   const bg = anim.interpolate({
     inputRange: [0, 1],
-    outputRange: ["#F5F5F5", "#337539"],
+    outputRange: [isDark ? "#FFF3E0" : colors.inputBg, colors.primary],
   });
 
   return (
@@ -41,7 +42,7 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 10,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#FFF3E0",
     justifyContent: "center",
     alignItems: "center",
   },

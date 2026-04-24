@@ -1,5 +1,5 @@
 import { ICONES } from "@/components/categorias/categoriaAccordion";
-import { globalStyles } from "@/constants/globalStyles";
+import { useGlobalStyles } from "@/constants/globalStyles";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, Check, Heart, Pencil, Tag, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
@@ -35,6 +35,7 @@ const CATEGORIAS_MOCK = [
 ];
 /////////////////////////////////////////////
 export default function ListaAberta() {
+  const globalStyles = useGlobalStyles();
   const router = useRouter();
   const params = useLocalSearchParams();
   const progressAnim = useRef(new Animated.Value(0)).current;

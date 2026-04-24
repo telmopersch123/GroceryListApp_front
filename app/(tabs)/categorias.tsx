@@ -1,19 +1,15 @@
-import {
-  CategoriaAccordion,
-  ICONES,
-} from "@/components/categorias/categoriaAccordion";
-import { IconeButton } from "@/components/categorias/iconeButton";
-import { globalStyles } from "@/constants/globalStyles";
-import { LayoutGrid, Plus, X } from "lucide-react-native";
+import { CategoriaAccordion } from "@/components/categorias/categoriaAccordion";
+
+import { CategoryModal } from "@/components/categorias/ModalCategorias";
+import { useGlobalStyles } from "@/constants/globalStyles";
+import { LayoutGrid, Plus } from "lucide-react-native";
 import React, { useRef, useState } from "react";
 import {
   Keyboard,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -22,6 +18,7 @@ import { Categoria, TypeListRenderHome } from "../types/typesGlobal";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
 
 export default function Categorias() {
+  const globalStyles = useGlobalStyles();
   const openSwipeRef = useRef<SwipeableRef | null>(null);
   const [modalVisivel, setModalVisivel] = useState(false);
   const [nomeCategoria, setNomeCategoria] = useState("");
@@ -80,10 +77,12 @@ export default function Categorias() {
 
   const ExitModal = () => {
     Keyboard.dismiss();
-    setError("");
-    setNomeCategoria("");
-    setIconeSelecionado(0);
-    setModalVisivel(false);
+    setTimeout(() => {
+      setError("");
+      setNomeCategoria("");
+      setIconeSelecionado(0);
+      setModalVisivel(false);
+    }, 50);
   };
 
   return (
@@ -155,64 +154,17 @@ export default function Categorias() {
         )}
       </View>
 
-      <Modal
+      <CategoryModal
         visible={modalVisivel}
-        transparent
-        animationType="fade"
-        onRequestClose={ExitModal}
-      >
-        <Pressable style={styles.overlay} onPress={ExitModal}>
-          <Pressable style={styles.modal} onPress={() => {}}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Nova Categoria</Text>
-              <Pressable onPress={ExitModal}>
-                <X size={20} color="#424242" />
-              </Pressable>
-            </View>
-
-            <View style={globalStyles.inputContainer}>
-              <Text style={styles.label}>NOME DA CATEGORIA</Text>
-              <TextInput
-                placeholder="Ex: Limpeza"
-                placeholderTextColor="#9E9E9E"
-                value={nomeCategoria}
-                onChangeText={(text) => {
-                  setError("");
-                  setNomeCategoria(text);
-                }}
-                maxLength={30}
-                style={[styles.input, error && globalStyles.inputError]}
-              />
-              <Text style={globalStyles.error}>{error || " "}</Text>
-            </View>
-
-            <Text style={styles.label}>ÍCONE</Text>
-            <View style={styles.iconGrid}>
-              {ICONES.map((Icone, index) => (
-                <IconeButton
-                  key={index}
-                  Icone={Icone}
-                  index={index}
-                  selecionado={iconeSelecionado === index}
-                  onPress={setIconeSelecionado}
-                />
-              ))}
-            </View>
-
-            <View style={styles.modalFooter}>
-              <Pressable style={styles.cancelButton} onPress={ExitModal}>
-                <Text style={styles.cancelText}>Cancelar</Text>
-              </Pressable>
-              <Pressable
-                onPress={handleCreateCategory}
-                style={styles.saveButton}
-              >
-                <Text style={styles.saveText}>Salvar</Text>
-              </Pressable>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+        onClose={ExitModal}
+        nomeCategoria={nomeCategoria}
+        setNomeCategoria={setNomeCategoria}
+        iconeSelecionado={iconeSelecionado}
+        setIconeSelecionado={setIconeSelecionado}
+        error={error}
+        handleCreateCategory={handleCreateCategory}
+        setError={setError}
+      />
     </SafeAreaView>
   );
 }

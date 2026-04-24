@@ -1,5 +1,7 @@
 import CardList from "@/components/ui/cardList";
-import { globalStyles } from "@/constants/globalStyles";
+
+import { useGlobalStyles } from "@/constants/globalStyles";
+import { useIsFocused } from "@react-navigation/native";
 import { useLocalSearchParams } from "expo-router";
 import { Heart } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
@@ -7,8 +9,9 @@ import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TypeListRenderHome } from "../types/typesGlobal";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
-
 export default function Favorites() {
+  const globalStyles = useGlobalStyles();
+  const isFocused = useIsFocused();
   const params = useLocalSearchParams();
   const openSwipeRef = useRef<SwipeableRef | null>(null);
   const [listas, setListas] = useState<TypeListRenderHome[]>([
@@ -56,14 +59,18 @@ export default function Favorites() {
             </Text>
           </View>
         ) : (
-          <View style={{ marginTop: 20 }}>
+          <View
+            style={{ marginTop: 20, flex: 1, overflow: "hidden" }}
+            key={isFocused ? "focused" : "unfocused"}
+          >
             <ScrollView>
-              {favoritas.map((lista) => (
+              {favoritas.map((lista, index) => (
                 <CardList
                   key={lista.id}
                   lista={lista}
                   setListas={setListas}
                   openSwipeRef={openSwipeRef}
+                  index={index}
                 />
               ))}
             </ScrollView>
