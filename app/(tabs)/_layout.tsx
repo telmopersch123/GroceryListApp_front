@@ -29,9 +29,17 @@ export default function TabLayout() {
           tabBarInactiveTintColor: colors.subtext,
           tabBarStyle: {
             height: 60,
-            paddingBottom: 8,
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
             backgroundColor: colors.background,
             borderTopColor: colors.border,
+            // height: 60,
+            // marginTop: -55,
+            // backgroundColor: colors.background,
+            // borderTopColor: colors.border,
+            // position: "relative",
           },
         }}
       >

@@ -7,9 +7,11 @@ import { Heart } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSettings } from "../context/SettingsContext";
 import { TypeListRenderHome } from "../types/typesGlobal";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
 export default function Favorites() {
+  const { colors } = useSettings();
   const globalStyles = useGlobalStyles();
   const isFocused = useIsFocused();
   const params = useLocalSearchParams();
@@ -46,7 +48,14 @@ export default function Favorites() {
       <View style={globalStyles.container}>
         <Text style={globalStyles.title}>Favoritos</Text>
         <Text style={globalStyles.subtitle}>Suas listas favoritas</Text>
-
+        <View
+          style={{
+            height: 1,
+            backgroundColor: colors.border,
+            marginTop: 12,
+            marginHorizontal: -20,
+          }}
+        />
         {favoritas.length === 0 ? (
           <View style={globalStyles.emptyContainer}>
             <View style={globalStyles.iconCircle}>

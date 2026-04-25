@@ -1,29 +1,33 @@
+import { TrashButton } from "@/components/ui/trashButton";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { useRouter } from "expo-router";
-import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react-native";
+import { ArrowLeft, Plus, Save } from "lucide-react-native";
 import { useState } from "react";
 import {
   Keyboard,
-  LayoutAnimation,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  UIManager,
   View,
 } from "react-native";
+
 import Animated, {
   FadeIn,
   FadeOut,
   LinearTransition,
 } from "react-native-reanimated";
+
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSettings } from "../context/SettingsContext";
 import { showToast } from "../hooks/useToast";
 
 export default function CriarLista() {
+  const { colors, animationsEnabled } = useSettings();
   const globalStyles = useGlobalStyles();
+  const router = useRouter();
+
   const [nomeLista, setNomeLista] = useState("");
   const [item, setItem] = useState("");
   const [erroNome, setErroNome] = useState("");
@@ -31,14 +35,10 @@ export default function CriarLista() {
   const [ItensList, setItensList] = useState<{ id: string; name: string }[]>(
     []
   );
-  const router = useRouter();
-  if (Platform.OS === "android") {
-    if (UIManager.setLayoutAnimationEnabledExperimental) {
-      UIManager.setLayoutAnimationEnabledExperimental(true);
-    }
-  }
+
   function handleSalvar() {
     let temErro = false;
+
     if (!nomeLista.trim()) {
       setErroNome("O nome da lista é obrigatório.");
       temErro = true;
@@ -52,22 +52,27 @@ export default function CriarLista() {
     } else {
       setErroItem("");
     }
+
     if (ItensList.length === 0) {
       setErroItem("Adicione pelo menos um item");
       temErro = true;
     }
+
     if (temErro) return;
+
     const novaLista = {
       id: Date.now().toString(),
       name: nomeLista,
       itens: ItensList,
     };
+
     router.push({
       pathname: "/",
       params: {
         novaLista: JSON.stringify(novaLista),
       },
     });
+
     showToast({
       type: "success",
       text1: "Pronto",
@@ -76,21 +81,38 @@ export default function CriarLista() {
   }
 
   function handleRemover(id: string) {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setItensList((prev) => prev.filter((item) => item.id !== id));
+  }
+
+  function handleAddItem() {
+    if (!item.trim()) return;
+
+    const novoItem = {
+      id: Date.now().toString(),
+      name: item,
+    };
+
+    setItensList((prev) => [...prev, novoItem]);
+    setItem("");
+    setErroItem("");
   }
 
   return (
     <SafeAreaView style={globalStyles.safe} onTouchStart={Keyboard.dismiss}>
+      {/* HEADER */}
       <View style={globalStyles.containerRow}>
         <Pressable onPress={() => router.back()}>
-          <ArrowLeft size={24} color="#212121" />
+          <ArrowLeft size={24} color={colors.text} />
         </Pressable>
+
         <Text style={globalStyles.titleSecondary}>Nova Lista</Text>
       </View>
+
+      {/* INPUTS */}
       <View style={styles.container}>
         <View style={{ marginBottom: 5 }}>
           <Text style={globalStyles.label}>Nome da lista</Text>
+
           <TextInput
             placeholder="Ex: Compras do mês de Janeiro"
             placeholderTextColor="#9E9E9E"
@@ -102,9 +124,12 @@ export default function CriarLista() {
             }}
             style={[globalStyles.input, erroNome && globalStyles.inputError]}
           />
+
           <Text style={globalStyles.error}>{erroNome || " "}</Text>
         </View>
+
         <Text style={globalStyles.label}>Itens da sua lista</Text>
+
         <View style={globalStyles.row}>
           <TextInput
             placeholder="Adicionar item..."
@@ -124,59 +149,43 @@ export default function CriarLista() {
             ]}
           />
 
-          <Pressable
-            onPress={() => {
-              if (!item.trim()) return;
-              LayoutAnimation.configureNext(
-                LayoutAnimation.Presets.easeInEaseOut
-              );
-              const novoItem = {
-                id: Date.now().toString(),
-                name: item,
-              };
-              setItensList((prev) => [...prev, novoItem]);
-              setErroItem("");
-
-              setItem("");
-            }}
-            style={globalStyles.addButton}
-          >
+          <Pressable onPress={handleAddItem} style={globalStyles.addButton}>
             <Plus size={20} color="#fff" />
           </Pressable>
         </View>
+
         <Text style={globalStyles.error}>{erroItem || " "}</Text>
       </View>
 
+      {/* LISTA */}
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
         <View style={globalStyles.listContainer}>
-          {ItensList.map((item, _) => (
+          {ItensList.map((item) => (
             <Animated.View
-              entering={FadeIn.duration(400)}
-              exiting={FadeOut.duration(300)}
-              layout={LinearTransition.springify().damping(15)}
               key={item.id}
+              entering={animationsEnabled ? FadeIn.duration(120) : undefined}
+              exiting={animationsEnabled ? FadeOut.duration(120) : undefined}
+              layout={
+                animationsEnabled ? LinearTransition.duration(180) : undefined
+              }
               style={globalStyles.itemCard}
             >
               <Text style={globalStyles.itemText}>{item.name}</Text>
-              <Pressable
+
+              <TrashButton
                 onPress={() => handleRemover(item.id)}
-                style={({ pressed }) => [
-                  globalStyles.trashButton,
-                  pressed && { transform: [{ scale: 0.9 }] },
-                ]}
-              >
-                {({ pressed }) => (
-                  <Trash2 size={20} color={pressed ? "#E53935" : "black"} />
-                )}
-              </Pressable>
+                color={colors.text}
+              />
             </Animated.View>
           ))}
         </View>
       </ScrollView>
+
+      {/* BOTÃO SALVAR */}
       <View style={globalStyles.buttonContainer}>
         <Pressable style={globalStyles.saveButton} onPress={handleSalvar}>
           <Save size={18} color="#fff" />
@@ -186,29 +195,9 @@ export default function CriarLista() {
     </SafeAreaView>
   );
 }
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 20,
-    gap: 10,
-  },
-  backButton: {
-    padding: 5,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
 
+const styles = StyleSheet.create({
   container: {
     padding: 20,
-  },
-
-  listTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#212121",
-    marginBottom: 10,
   },
 });

@@ -1,5 +1,4 @@
 import { CategoriaAccordion } from "@/components/categorias/categoriaAccordion";
-
 import { CategoryModal } from "@/components/categorias/ModalCategorias";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { LayoutGrid, Plus } from "lucide-react-native";
@@ -13,18 +12,24 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSettings } from "../context/SettingsContext";
 import { showToast } from "../hooks/useToast";
 import { Categoria, TypeListRenderHome } from "../types/typesGlobal";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
 
 export default function Categorias() {
+  const { colors } = useSettings();
   const globalStyles = useGlobalStyles();
+  const styles = makeStyles(colors);
+
   const openSwipeRef = useRef<SwipeableRef | null>(null);
+
   const [modalVisivel, setModalVisivel] = useState(false);
   const [nomeCategoria, setNomeCategoria] = useState("");
   const [iconeSelecionado, setIconeSelecionado] = useState(0);
   const [error, setError] = useState("");
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+
   const [listas, setListas] = useState<TypeListRenderHome[]>([
     {
       id: "1",
@@ -37,12 +42,12 @@ export default function Categorias() {
     },
     {
       id: "2",
-      name: "Mercado semana",
+      name: "Mercado da semana",
       favorited: false,
       itens: [
         { id: "1", name: "Leite", checked: false },
         { id: "2", name: "Ovos", checked: false },
-        { id: "3", name: "Pão", checked: false },
+        { id: "3", name: "Pão francês", checked: false },
       ],
     },
     {
@@ -50,8 +55,29 @@ export default function Categorias() {
       name: "Churrasco fim de semana",
       favorited: false,
       itens: [
-        { id: "1", name: "Carne", checked: false },
+        { id: "1", name: "Carne bovina", checked: false },
         { id: "2", name: "Carvão", checked: false },
+        { id: "3", name: "Cerveja", checked: false },
+      ],
+    },
+    {
+      id: "4",
+      name: "Casa e limpeza",
+      favorited: false,
+      itens: [
+        { id: "1", name: "Detergente", checked: false },
+        { id: "2", name: "Desinfetante", checked: false },
+        { id: "3", name: "Esponja", checked: false },
+      ],
+    },
+    {
+      id: "5",
+      name: "Hortifruti saudável",
+      favorited: true,
+      itens: [
+        { id: "1", name: "Banana", checked: false },
+        { id: "2", name: "Maçã", checked: false },
+        { id: "3", name: "Alface", checked: false },
       ],
     },
   ]);
@@ -61,28 +87,26 @@ export default function Categorias() {
       setError("O nome da categoria é obrigatório.");
       return;
     }
-    const novaCategoria: Categoria = {
-      id: Date.now().toString(),
-      nome: nomeCategoria,
-      iconeIndex: iconeSelecionado,
-    };
-    setCategorias((prev) => [...prev, novaCategoria]);
-    ExitModal();
+
+    setCategorias((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        nome: nomeCategoria,
+        iconeIndex: iconeSelecionado,
+      },
+    ]);
+
+    setError("");
+    setNomeCategoria("");
+    setIconeSelecionado(0);
+    setModalVisivel(false);
+
     showToast({
       type: "success",
       text1: "Pronto",
       text2: "Categoria criada com sucesso!",
     });
-  };
-
-  const ExitModal = () => {
-    Keyboard.dismiss();
-    setTimeout(() => {
-      setError("");
-      setNomeCategoria("");
-      setIconeSelecionado(0);
-      setModalVisivel(false);
-    }, 50);
   };
 
   return (
@@ -100,6 +124,7 @@ export default function Categorias() {
             <Text style={globalStyles.title}>Categorias</Text>
             <Text style={globalStyles.subtitle}>Listas organizadas</Text>
           </View>
+
           {categorias.length > 0 && (
             <Pressable
               style={({ pressed }) => [
@@ -108,21 +133,25 @@ export default function Categorias() {
               ]}
               onPress={() => setModalVisivel(true)}
             >
-              <Plus size={18} color="#fff" />
-              <Text style={styles.text}>Nova categoria</Text>
+              <Plus size={18} color={colors.background} />
+              <Text style={styles.buttonText}>Nova categoria</Text>
             </Pressable>
           )}
         </View>
 
+        <View style={styles.divider} />
+
         {categorias.length === 0 ? (
           <View style={globalStyles.emptyContainer}>
             <View style={globalStyles.iconCircle}>
-              <LayoutGrid size={32} color="#424242" />
+              <LayoutGrid size={32} color={colors.subtext} />
             </View>
+
             <Text style={globalStyles.emptyTitle}>Sem categorias</Text>
             <Text style={globalStyles.emptyText}>
               Crie categorias para organizar suas listas de compras.
             </Text>
+
             <Pressable
               style={({ pressed }) => [
                 styles.button,
@@ -130,33 +159,32 @@ export default function Categorias() {
               ]}
               onPress={() => setModalVisivel(true)}
             >
-              <Plus size={18} color="#fff" />
-              <Text style={styles.text}>Nova categoria</Text>
+              <Plus size={18} color={colors.background} />
+              <Text style={styles.buttonText}>Nova categoria</Text>
             </Pressable>
           </View>
         ) : (
           <ScrollView
             contentContainerStyle={styles.listContainer}
             keyboardDismissMode="on-drag"
+            showsVerticalScrollIndicator={false}
           >
-            {categorias.map((categoria) => {
-              return (
-                <CategoriaAccordion
-                  key={categoria.id}
-                  categoria={categoria}
-                  listas={listas}
-                  setListas={setListas}
-                  openSwipeRef={openSwipeRef}
-                />
-              );
-            })}
+            {categorias.map((categoria) => (
+              <CategoriaAccordion
+                key={categoria.id}
+                categoria={categoria}
+                listas={listas}
+                setListas={setListas}
+                openSwipeRef={openSwipeRef}
+              />
+            ))}
           </ScrollView>
         )}
       </View>
 
       <CategoryModal
         visible={modalVisivel}
-        onClose={ExitModal}
+        onClose={() => setModalVisivel(false)}
         nomeCategoria={nomeCategoria}
         setNomeCategoria={setNomeCategoria}
         iconeSelecionado={iconeSelecionado}
@@ -169,108 +197,44 @@ export default function Categorias() {
   );
 }
 
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  button: {
-    backgroundColor: "#337539",
-    padding: 9,
-    borderRadius: 10,
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 20,
-  },
-  buttonPressed: {
-    opacity: 0.7,
-  },
-  text: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  listContainer: {
-    paddingTop: 10,
-    paddingBottom: 100,
-  },
+const makeStyles = (colors: any) =>
+  StyleSheet.create({
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
 
-  categoriaCardPressed: {
-    opacity: 0.7,
-  },
+    button: {
+      backgroundColor: colors.primary,
+      paddingVertical: 9,
+      paddingHorizontal: 12,
+      borderRadius: 10,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginTop: 20,
+    },
 
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modal: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 24,
-    width: "90%",
-    gap: 10,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#212121",
-  },
-  label: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#757575",
-    letterSpacing: 0.8,
-  },
-  input: {
-    backgroundColor: "#F5F5F5",
-    padding: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "transparent",
-    fontSize: 15,
-    marginTop: 8,
-  },
-  iconGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 4,
-  },
-  modalFooter: {
-    flexDirection: "row",
-    gap: 10,
-    marginTop: 8,
-  },
-  cancelButton: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-  },
-  cancelText: {
-    color: "#424242",
-    fontWeight: "600",
-  },
-  saveButton: {
-    flex: 1,
-    backgroundColor: "#337539",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  saveText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-});
+    buttonPressed: {
+      opacity: 0.7,
+    },
+
+    buttonText: {
+      color: colors.background,
+      fontWeight: "bold",
+      fontSize: 13,
+    },
+
+    listContainer: {
+      paddingTop: 10,
+      paddingBottom: 100,
+    },
+
+    divider: {
+      height: 1,
+      backgroundColor: colors.border,
+      marginTop: 12,
+      marginHorizontal: -20,
+    },
+  });

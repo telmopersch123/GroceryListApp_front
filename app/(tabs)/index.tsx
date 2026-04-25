@@ -6,11 +6,16 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Plus, ShoppingCart } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { useSettings } from "../context/SettingsContext";
 import { TypeListRenderHome } from "../types/typesGlobal";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
-
 export default function Home() {
+  const insets = useSafeAreaInsets();
+  const { colors } = useSettings();
   const globalStyles = useGlobalStyles();
   const isFocused = useIsFocused();
   const router = useRouter();
@@ -27,7 +32,7 @@ export default function Home() {
 
   return (
     <SafeAreaView
-      style={globalStyles.safe}
+      style={[globalStyles.safe, { backgroundColor: colors.background }]}
       onStartShouldSetResponderCapture={() => {
         closeAllSwipes(openSwipeRef);
         return false;
@@ -36,7 +41,14 @@ export default function Home() {
       <View style={globalStyles.container}>
         <Text style={globalStyles.title}>Lista Mercado</Text>
         <Text style={globalStyles.subtitle}>Suas listas de compras</Text>
-
+        <View
+          style={{
+            height: 1,
+            backgroundColor: colors.border,
+            marginTop: 12,
+            marginHorizontal: -20,
+          }}
+        />
         {listas.length === 0 ? (
           <View style={globalStyles.emptyContainer}>
             <View style={globalStyles.iconCircle}>
@@ -72,6 +84,9 @@ export default function Home() {
         onPress={() => router.push("/components/criar-lista")}
         style={({ pressed }) => [
           globalStyles.floatingButton,
+          {
+            bottom: insets.bottom + 45,
+          },
           pressed && globalStyles.floatingButtonPressed,
         ]}
       >

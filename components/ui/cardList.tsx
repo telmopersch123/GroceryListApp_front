@@ -28,10 +28,12 @@ export default function CardList({
   openSwipeRef,
   index,
 }: PropsCardList) {
-  const { animationsEnabled } = useSettings();
+  const { animationsEnabled, colors } = useSettings();
+  const globalStyles = useGlobalStyles();
+
   const swipeableRef = useRef<SwipeableRef | null>(null);
   const [isSwiping, setIsSwiping] = useState(false);
-  const globalStyles = useGlobalStyles();
+
   return (
     <Animated.View
       entering={
@@ -52,19 +54,12 @@ export default function CardList({
           ) {
             openSwipeRef.current.close();
           }
-
           openSwipeRef.current = swipeableRef.current;
         }}
         renderRightActions={(
           prog: SharedValue<number>,
           drag: SharedValue<number>
-        ) => (
-          <RightAction
-            prog={prog}
-            drag={drag}
-            // onRemover={() => onRemover(categoria.id)}
-          />
-        )}
+        ) => <RightAction prog={prog} drag={drag} />}
         onSwipeableWillOpen={() => setIsSwiping(true)}
         onSwipeableClose={() => setIsSwiping(false)}
         onSwipeableWillClose={() => setIsSwiping(false)}
@@ -74,17 +69,25 @@ export default function CardList({
       >
         <Pressable
           disabled={isSwiping}
-          key={lista.id}
           onPress={() =>
             router.push({
               pathname: "/components/lista-aberta",
               params: { lista: JSON.stringify(lista) },
             })
           }
-          style={globalStyles.card}
+          style={[
+            globalStyles.card,
+            {
+              borderWidth: 1,
+              borderColor: colors.border,
+              backgroundColor: colors.card,
+            },
+          ]}
         >
           <View style={globalStyles.cardHeader}>
-            <Text style={globalStyles.cardTitle}>{lista.name}</Text>
+            <Text style={[globalStyles.cardTitle, { color: colors.text }]}>
+              {lista.name}
+            </Text>
 
             <View style={globalStyles.iconContainer}>
               <Pressable
@@ -94,7 +97,10 @@ export default function CardList({
                 ]}
               >
                 {({ pressed }) => (
-                  <Copy size={18} color={pressed ? "#2196F3" : "#424242"} />
+                  <Copy
+                    size={18}
+                    color={pressed ? colors.primary : colors.iconColor}
+                  />
                 )}
               </Pressable>
 
@@ -111,7 +117,7 @@ export default function CardList({
                   return (
                     <Star
                       size={18}
-                      color={isActive ? "#FFD700" : "#424242"}
+                      color={isActive ? "#FFD700" : colors.iconColor}
                       fill={isActive ? "#FFD700" : "transparent"}
                     />
                   );
@@ -121,13 +127,33 @@ export default function CardList({
           </View>
 
           <View style={globalStyles.progressRow}>
-            <View style={globalStyles.progressContainer}>
-              <View style={globalStyles.progressBar} />
+            <View
+              style={[
+                globalStyles.progressContainer,
+                {
+                  backgroundColor: colors.border,
+                },
+              ]}
+            >
+              <View
+                style={[
+                  globalStyles.progressBar,
+                  {
+                    backgroundColor: colors.primary,
+                    width: "40%",
+                  },
+                ]}
+              />
             </View>
-            <Text style={globalStyles.progressText}>0%</Text>
+
+            <Text
+              style={[globalStyles.progressText, { color: colors.subtext }]}
+            >
+              0%
+            </Text>
           </View>
 
-          <Text style={globalStyles.itemsText}>
+          <Text style={[globalStyles.itemsText, { color: colors.subtext }]}>
             0/{lista.itens.length} itens
           </Text>
         </Pressable>

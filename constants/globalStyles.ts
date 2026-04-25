@@ -99,6 +99,7 @@ export const useGlobalStyles = () => {
     error: {
       color: colors.error,
       padding: 5,
+      pointerEvents: "none",
     },
     input: {
       backgroundColor: colors.inputBg,
@@ -221,7 +222,6 @@ export const useGlobalStyles = () => {
       alignItems: "center",
       position: "absolute",
       right: 20,
-      bottom: 20,
     },
     floatingButtonPressed: {
       opacity: 0.7,

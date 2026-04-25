@@ -2,7 +2,7 @@ import Colors from "@/constants/Colors";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { Moon, Sparkles } from "lucide-react-native";
 import React from "react";
-import { Animated, StyleSheet, Switch, Text, View } from "react-native";
+import { StyleSheet, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSettings } from "../context/SettingsContext";
 type ColorScheme = typeof Colors.light;
@@ -15,66 +15,74 @@ export default function Configurações() {
     colors,
     themeAnim,
   } = useSettings();
+
   const globalStyles = useGlobalStyles();
   const styles = makeStyles(colors);
   return (
-    <Animated.View
-      style={{
-        flex: 1,
-        opacity: themeAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [1, 0.3],
-        }),
-      }}
-    >
-      <SafeAreaView style={globalStyles.safe}>
-        <View style={[globalStyles.container, styles.pagePadding]}>
-          <Text style={globalStyles.title}>Configurações</Text>
+    <SafeAreaView style={globalStyles.safe}>
+      <View style={[globalStyles.container, styles.pagePadding]}>
+        <Text style={globalStyles.title}>Configurações</Text>
+        <Text style={globalStyles.subtitle}>Preferências de exibição</Text>
+        <View
+          style={{
+            height: 1,
+            backgroundColor: colors.border,
+            marginTop: 12,
+            marginHorizontal: -20,
+          }}
+        />
 
-          <Text style={styles.sectionTitle}>Preferências de exibição</Text>
-
-          <View style={styles.card}>
-            {/* Opção: Animações */}
-            <View style={styles.row}>
-              <View style={styles.iconLabel}>
-                <Sparkles size={22} color="#337539" />
-                <View style={styles.textContainer}>
-                  <Text style={styles.label}>Interface Animada</Text>
-                  <Text style={styles.description}>
-                    Transições e efeitos visuais
-                  </Text>
-                </View>
+        <View style={styles.card}>
+          {/* Opção: Animações */}
+          <View style={styles.row}>
+            <View style={styles.iconLabel}>
+              <Sparkles size={22} color="#337539" />
+              <View style={styles.textContainer}>
+                <Text style={styles.label}>Interface Animada</Text>
+                <Text style={styles.description}>
+                  Transições e efeitos visuais
+                </Text>
               </View>
-              <Switch
-                value={animationsEnabled}
-                onValueChange={setAnimationsEnabled}
-                trackColor={{ false: "#D1D1D1", true: "#337539" }}
-              />
             </View>
+            <Switch
+              value={animationsEnabled}
+              onValueChange={setAnimationsEnabled}
+              trackColor={{
+                false: colors.border,
+                true: colors.primary,
+              }}
+              thumbColor="#fff"
+              ios_backgroundColor={colors.border}
+            />
+          </View>
 
-            <View style={styles.divider} />
+          <View style={styles.divider} />
 
-            {/* Opção: Dark Mode */}
-            <View style={styles.row}>
-              <View style={styles.iconLabel}>
-                <Moon size={22} color="#337539" />
-                <View style={styles.textContainer}>
-                  <Text style={styles.label}>Modo Escuro</Text>
-                  <Text style={styles.description}>
-                    Visual confortável para a noite
-                  </Text>
-                </View>
+          {/* Opção: Dark Mode */}
+          <View style={styles.row}>
+            <View style={styles.iconLabel}>
+              <Moon size={22} color="#337539" />
+              <View style={styles.textContainer}>
+                <Text style={styles.label}>Modo Escuro</Text>
+                <Text style={styles.description}>
+                  Visual confortável para a noite
+                </Text>
               </View>
-              <Switch
-                value={isDark}
-                onValueChange={toggleTheme}
-                trackColor={{ false: "#D1D1D1", true: "#337539" }}
-              />
             </View>
+            <Switch
+              value={isDark}
+              onValueChange={toggleTheme}
+              trackColor={{
+                false: colors.border,
+                true: colors.primary,
+              }}
+              thumbColor="#fff"
+              ios_backgroundColor={colors.border}
+            />
           </View>
         </View>
-      </SafeAreaView>
-    </Animated.View>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -83,15 +91,7 @@ const makeStyles = (colors: ColorScheme) =>
     pagePadding: {
       paddingHorizontal: 20,
     },
-    sectionTitle: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: colors.subtext,
-      textTransform: "uppercase",
-      marginBottom: 12,
-      marginTop: 20,
-      letterSpacing: 1,
-    },
+
     card: {
       backgroundColor: colors.card,
       borderRadius: 16,
@@ -99,6 +99,7 @@ const makeStyles = (colors: ColorScheme) =>
       paddingHorizontal: 16,
       borderWidth: 1,
       borderColor: colors.border,
+      marginTop: 20,
     },
     row: {
       flexDirection: "row",

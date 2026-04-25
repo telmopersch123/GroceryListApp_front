@@ -1,7 +1,13 @@
 import Colors from "@/constants/Colors";
-import React, { createContext, useContext, useRef, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Animated } from "react-native";
-
 const DURATION = 180;
 
 const SettingsContext = createContext({
@@ -23,26 +29,84 @@ export const SettingsProvider = ({
 
   const themeAnim = useRef(new Animated.Value(0)).current;
 
+  // const toggleTheme = () => {
+  //   if (!animationsEnabled) {
+  //     const next = !isDark;
+  //     setIsDark(next);
+  //     AsyncStorage.setItem("theme", next ? "dark" : "light");
+  //     return;
+  //   }
+
+  //   Animated.timing(themeAnim, {
+  //     toValue: 1,
+  //     duration: DURATION,
+  //     useNativeDriver: true,
+  //   }).start(async () => {
+  //     setIsDark((prev) => {
+  //       const next = !prev;
+  //       AsyncStorage.setItem("theme", next ? "dark" : "light");
+  //       return next;
+  //     });
+
+  //     themeAnim.setValue(0);
+  //   });
+  // };
+
+  // const toggleTheme = () => {
+  //   const next = !isDark;
+
+  //   setIsDark(next);
+  //   AsyncStorage.setItem("theme", next ? "dark" : "light");
+
+  //   if (!animationsEnabled) return;
+
+  //   themeAnim.setValue(1);
+
+  //   Animated.timing(themeAnim, {
+  //     toValue: 0,
+  //     duration: DURATION,
+  //     useNativeDriver: true,
+  //   }).start();
+  // };
+
   const toggleTheme = () => {
+    const next = !isDark;
+
     if (!animationsEnabled) {
-      setIsDark((prev) => !prev);
+      setIsDark(next);
+      AsyncStorage.setItem("theme", next ? "dark" : "light");
       return;
     }
 
+    themeAnim.setValue(0);
+
     Animated.timing(themeAnim, {
       toValue: 1,
-      duration: DURATION,
+      duration: 300,
       useNativeDriver: true,
     }).start(() => {
-      setIsDark((prev) => !prev);
+      setIsDark(next);
+      AsyncStorage.setItem("theme", next ? "dark" : "light");
 
       Animated.timing(themeAnim, {
         toValue: 0,
-        duration: DURATION,
+        duration: 180,
         useNativeDriver: true,
       }).start();
     });
   };
+
+  useEffect(() => {
+    const loadTheme = async () => {
+      const saved = await AsyncStorage.getItem("theme");
+      const dark = saved === "dark";
+
+      setIsDark(dark);
+      themeAnim.setValue(0);
+    };
+
+    loadTheme();
+  }, []);
 
   const colors = isDark ? Colors.dark : Colors.light;
 

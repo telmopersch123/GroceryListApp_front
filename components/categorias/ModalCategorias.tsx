@@ -67,7 +67,6 @@ export const CategoryModal = ({
               placeholder="Ex: Limpeza"
               placeholderTextColor="#9E9E9E"
               value={nomeCategoria}
-              underlineColorAndroid="transparent"
               onChangeText={(text) => {
                 setError("");
                 setNomeCategoria(text);
@@ -150,6 +149,7 @@ const makeStyles = (colors: ColorScheme) =>
       flexWrap: "wrap",
       gap: 8,
       marginTop: 4,
+      justifyContent: "center",
     },
     modalFooter: {
       flexDirection: "row",

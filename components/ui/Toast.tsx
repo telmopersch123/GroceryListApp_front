@@ -1,13 +1,9 @@
+import { useSettings } from "@/app/context/SettingsContext";
 import { CheckCircle, Info, XCircle } from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
 import { Animated, Text, View } from "react-native";
-type ToastType = "success" | "error" | "info";
 
-const COLORS: Record<ToastType, string> = {
-  success: "#337539",
-  error: "#D32F2F",
-  info: "#1565C0",
-};
+type ToastType = "success" | "error" | "info";
 
 interface Props {
   visible: boolean;
@@ -18,12 +14,6 @@ interface Props {
   visibilityTime?: number;
 }
 
-const ICONS: Record<ToastType, React.ReactNode> = {
-  success: <CheckCircle size={22} color="#337539" />,
-  error: <XCircle size={22} color="#D32F2F" />,
-  info: <Info size={22} color="#1565C0" />,
-};
-
 export function Toast({
   visible,
   type,
@@ -32,10 +22,27 @@ export function Toast({
   onHide,
   visibilityTime = 3000,
 }: Props) {
+  const { colors } = useSettings();
   const translateX = useRef(new Animated.Value(400)).current;
+
+  const config = {
+    success: {
+      icon: <CheckCircle size={22} color={colors.primary} />,
+      accent: colors.primary,
+    },
+    error: {
+      icon: <XCircle size={22} color={colors.error} />,
+      accent: colors.error,
+    },
+    info: {
+      icon: <Info size={22} color={colors.tint} />,
+      accent: colors.tint,
+    },
+  };
 
   useEffect(() => {
     if (visible) {
+      translateX.setValue(400);
       Animated.spring(translateX, {
         toValue: 0,
         useNativeDriver: true,
@@ -45,16 +52,14 @@ export function Toast({
       const timeout = setTimeout(() => {
         Animated.timing(translateX, {
           toValue: 400,
-          duration: 300,
+          duration: 250,
           useNativeDriver: true,
         }).start(() => onHide());
-      }, visibilityTime - 300);
+      }, visibilityTime);
 
       return () => clearTimeout(timeout);
     }
   }, [visible]);
-
-  if (!visible) return null;
 
   return (
     <Animated.View
@@ -63,28 +68,44 @@ export function Toast({
         position: "absolute",
         bottom: 32,
         right: 16,
-        backgroundColor: "#fff",
+        backgroundColor: colors.card,
         borderRadius: 12,
-        padding: 16,
+        padding: 22,
         minWidth: 260,
         borderLeftWidth: 5,
-        borderLeftColor: COLORS[type],
+        borderLeftColor: config[type].accent,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.15,
         shadowRadius: 6,
         elevation: 6,
         zIndex: 9999,
+        width: "90%",
+        maxWidth: 380,
       }}
     >
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-        {ICONS[type]}
+      <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
+        {config[type].icon}
+
         <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 16, fontWeight: "600", color: "#212121" }}>
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: "600",
+              color: colors.text,
+            }}
+          >
             {text1}
           </Text>
+
           {text2 && (
-            <Text style={{ fontSize: 14, color: "#757575", marginTop: 4 }}>
+            <Text
+              style={{
+                fontSize: 14,
+                color: colors.subtext,
+                marginTop: 4,
+              }}
+            >
               {text2}
             </Text>
           )}
